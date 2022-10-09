@@ -8,7 +8,7 @@ The "simple_shell" supports the following features:
 ![Screenshot from 2022-10-09 18-27-47](https://user-images.githubusercontent.com/89909599/194771889-6b33f3ac-55aa-477e-abf4-a800651181fc.png)
 
 ---
-#### Support local variabless
+#### Support local variables
 ---
 ![Screenshot from 2022-10-09 18-33-24](https://user-images.githubusercontent.com/89909599/194771920-5e244b78-caec-4ebd-94dd-4578ed5f1b26.png)
 
