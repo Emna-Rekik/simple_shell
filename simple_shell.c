@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 void substring(char *orig, char *substr, int index, int length);
 
@@ -99,6 +100,36 @@ int main()
 			if (strchr(buf, '=') != NULL)
 			{
 				return 1;
+			}
+			
+			if (strchr(buf, '>') != NULL)
+			{
+				int count = 0;
+				while(buf[count] != '>')
+				{
+					count ++;
+				}
+				char global[20];
+				substring(buf, global, count+1, strlen(buf));
+				
+				// remove spaces from the buffer
+				int count2 = 0;
+				for(int i=0; i < global[i]; i++)
+					if(global[i] != ' ')
+						global[count2++] = global[i];
+				global[count2] = '\0';
+				
+				int dest_fd = open(global, O_CREAT | O_WRONLY, 0644);
+				if (dest_fd == -1)
+				{
+					printf("Error msg: Failed to create and open the file\n");
+				}
+				dup2(dest_fd,1); // 1 pour STDOUT
+				close(dest_fd);
+				
+				char global2[15];
+				substring(buf, global2, 0, count);
+				strcpy(buf, global2);
 			}
 			
 			if (strcmp(buf, "set") == 0)
