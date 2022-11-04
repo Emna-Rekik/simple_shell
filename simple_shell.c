@@ -7,14 +7,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-void substring(char *orig, char *substr, int index, int length);
-
-struct local_var
-{
-	char fist_operand[20]; 
-	char second_operand[20];
-};
-struct local_var locals[100]; 
+#include "headers/functions_headers.h"
+#include "headers/local_var_struct.h"
+#include "headers/remove_spaces.h"
+#include "headers/substring.h"
 
 int main()
 {
@@ -29,9 +25,25 @@ int main()
 
 		if(strlen(buf) == 0)
 			continue;
-			
+
+		if (strchr(buf, '=') != NULL)
+		{
+			local = assign_local_variables(buf, local);
+			continue;
+		}
+		else if (strcmp(buf, "set") == 0)
+		{
+			print_local_variables(local);
+			continue;
+		}
+		else if (strstr(buf, "export"))
+		{
+			export_local_variables(buf, local);			
+			continue;
+		}
+
 		int ret_pid = fork();
-		
+
 		if(ret_pid < 0)
 		{
 			printf("Fork Failed\n");
@@ -40,68 +52,10 @@ int main()
 		{
 			int status;
 			wait(&status);
-			if (WEXITSTATUS(status) == 1)
-			{
-				// remove spaces from the buffer
-				int count = 0;
-				for(int i=0; i < buf[i]; i++)
-					if(buf[i] != ' ')
-						buf[count++] = buf[i];
-				buf[count] = '\0';
-				
-				count = 0;
-				while(buf[count] != '=')
-				{
-					count ++;
-				}
-				substring(buf, locals[local].fist_operand, 0, count);
-				substring(buf, locals[local].second_operand, count+1, strlen(buf));
-				local ++;
-			}
-			else if (WEXITSTATUS(status) == 2)
-			{
-				for(int i=0; i < local; i++)
-				{
-					printf("local_vars[%d]: %s = %s\n", i, locals[i].fist_operand, locals[i].second_operand);
-				}
-			}
-			else if (WEXITSTATUS(status) == 3)
-			{
-				int count = 0;
-				while(buf[count] != ' ')
-				{
-					count ++;
-				}
-				char global[20];
-				substring(buf, global, count+1, strlen(buf));
-				int exist = 0;
-				int i =0;
-				while(i < local && exist == 0)
-				{
-					if (strcmp(locals[i].fist_operand, global) == 0)
-					{
-						exist = 1;
-					}
-					i++;	
-				}
-				if (exist)
-				{
-					setenv(locals[i-1].fist_operand, locals[i-1].second_operand, 1);
-				}
-				else
-				{
-					printf("Could not export [%s], variable does not exist!\n", global);
-				}
-				
-			}
+
 		}
 		else if (ret_pid == 0)
 		{
-			if (strchr(buf, '=') != NULL)
-			{
-				return 1;
-			}
-			
 			if (strchr(buf, '>') != NULL)
 			{
 				int count = 0;
@@ -111,14 +65,8 @@ int main()
 				}
 				char global[20];
 				substring(buf, global, count+1, strlen(buf));
-				
-				// remove spaces from the buffer
-				int count2 = 0;
-				for(int i=0; i < global[i]; i++)
-					if(global[i] != ' ')
-						global[count2++] = global[i];
-				global[count2] = '\0';
-				
+				remove_spaces(global);
+
 				int dest_fd = open(global, O_CREAT | O_WRONLY, 0644);
 				if (dest_fd == -1)
 				{
@@ -126,22 +74,12 @@ int main()
 				}
 				dup2(dest_fd,1); // 1 pour STDOUT
 				close(dest_fd);
-				
+
 				char global2[15];
 				substring(buf, global2, 0, count);
 				strcpy(buf, global2);
 			}
-			
-			if (strcmp(buf, "set") == 0)
-			{
-				return 2;
-			}
-			
-			if (strstr(buf, "export"))
-			{
-				return 3;
-			}
-			
+
 			char *newargv[50];
 			char args [50][50];
 			int arg = 0;
@@ -166,27 +104,20 @@ int main()
 					arg ++;
 				}
 			}
+			if (strcmp(newargv[0],"cat") == 0 && (newargv[1][0] != '.' && newargv[1][0] != '/'))
+			{
+				char dest[] = "./";
+				strcat(dest, newargv[1]);
+				strcpy(newargv[1], dest);
+				remove_spaces(newargv[1]);
+			}
+
 			newargv[arg] = NULL;
 			execvp(newargv[0], newargv);
 			printf("Exec Failed\n");
 			return 9;
 		}
-			
+
 	}
 	return 0;
-}
-
-void substring(char *orig, char *substr, int index, int length)
-{
-	if(index >= strlen(orig))
-	{
-		substr[0] = '\n';
-		return;
-	}
-	int c = 0;
-	while (c < length && orig[index + 1] != '\n')
-	{
-		substr[c] = orig[index+c];
-		c++;
-	}
 }
