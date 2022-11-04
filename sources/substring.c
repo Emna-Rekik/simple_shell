@@ -1,6 +1,6 @@
 #include <string.h>
 
-void substring(char *orig, char *substr, int index, int length)
+void substring(char orig[], char substr[], int index, int length)
 {
 	if(index >= strlen(orig))
 	{

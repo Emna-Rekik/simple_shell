@@ -63,7 +63,7 @@ int main()
 				{
 					count ++;
 				}
-				char global[20];
+				char* global;
 				substring(buf, global, count+1, strlen(buf));
 				remove_spaces(global);
 
@@ -74,8 +74,8 @@ int main()
 				}
 				dup2(dest_fd,1); // 1 pour STDOUT
 				close(dest_fd);
-
-				char global2[15];
+				
+				char global2[40];
 				substring(buf, global2, 0, count);
 				strcpy(buf, global2);
 			}
