@@ -63,7 +63,7 @@ int main()
 				{
 					count ++;
 				}
-				char* global;
+				char global[10];
 				substring(buf, global, count+1, strlen(buf));
 				remove_spaces(global);
 
