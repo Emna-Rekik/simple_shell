@@ -63,9 +63,11 @@ int main()
 				{
 					count ++;
 				}
-				char global[10];
+				char* global;
 				substring(buf, global, count+1, strlen(buf));
 				remove_spaces(global);
+				char temp[40];
+				strcpy(temp, global);
 
 				int dest_fd = open(global, O_CREAT | O_WRONLY, 0644);
 				if (dest_fd == -1)
