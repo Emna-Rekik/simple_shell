@@ -24,9 +24,8 @@ The "simple_shell" supports the following features:
 ![Screenshot from 2022-10-15 15-24-47](https://user-images.githubusercontent.com/89909599/195992924-f4707a1a-ff6e-497f-9ffd-da616727c73e.png)
 
 
-Compilation command:
+#### Compilation command :
 
 ```
-$ gcc -o simple_shell simple_shell.c
-
+$ gcc sources/substring.c sources/remove_spaces.c sources/assign_local_variables.c sources/print_local_variables.c sources/export_local_variables.c simple_shell.c -o simple_shell
 ```
